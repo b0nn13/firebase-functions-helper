@@ -81,10 +81,12 @@ export class FirestoreHelper {
                     return {
                         exists: false
                     };
-                } else {                    
+                } else { 
+                    let docObj = Object.assign({}, doc.data());
+                    docObj.id = doc.id;           
                     return {
                         exists: true,
-                        data: doc.data()
+                        data: docObj
                     };
                 }
             })
@@ -105,8 +107,10 @@ export class FirestoreHelper {
     getDocument(db: any, collectionName: string, documentId: string): Promise<any> {
         const docRef = db.collection(collectionName).doc(documentId);
         return docRef.get().then(function(doc) {
-            if (doc.exists) {                
-                return doc.data();
+            if (doc.exists) {     
+                let docObj = Object.assign({}, doc.data());
+                docObj.id = doc.id;           
+                return docObj;
             } else {
                 // doc.data() will be undefined in this case
                 console.log("No such document!");
@@ -130,12 +134,14 @@ export class FirestoreHelper {
         return new Promise((resolve, reject) => {
             let dataRef = db.collection(collectionName);            
             let queryRef = dataRef.where(queryArray[0], queryArray[1], queryArray[2]);
-            let results = {};
+            let results = [];
 
             queryRef.get()
                 .then(snapshot => {
                     snapshot.forEach(doc => {                        
-                        results[doc.id] = doc.data();
+                        let docObj = Object.assign({}, doc.data());
+                        docObj.id = doc.id;
+                        results.push(docObj);
                     });                                                        
                     if(Object.keys(results).length > 0){
                         resolve(results);
